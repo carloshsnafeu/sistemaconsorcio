@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sorteou_ganhou_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sorteou_ganhou
+    ports:
+      - "5432:5432"
+    volumes:
+      - sorteou_ganhou_pgdata:/var/lib/postgresql/data
+
+volumes:
+  sorteou_ganhou_pgdata:
