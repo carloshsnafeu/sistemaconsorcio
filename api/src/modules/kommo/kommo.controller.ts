@@ -3,7 +3,7 @@ import { KommoService } from "./kommo.service";
 
 export const kommoController = {
   async webhook(req: Request, res: Response) {
-    const event = await KommoService.saveWebhook(req.body);
+    const event = await KommoService.receiveWebhook(req.body);
     return res.status(201).json({ received: true, event });
   }
 };

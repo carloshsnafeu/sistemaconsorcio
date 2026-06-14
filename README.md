@@ -53,6 +53,7 @@ Edite `api/.env` se o PostgreSQL local usar outro usuário, senha, host ou porta
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sorteou_ganhou"
 JWT_SECRET="dev_secret_change_me"
+PUBLIC_API_KEY="change_me_public_api_key"
 PORT=3333
 ```
 
@@ -104,6 +105,80 @@ Todas as rotas administrativas exigem `Authorization: Bearer <token>`. Webhooks 
 - `POST /api/kommo/webhook`
 - `POST /api/whatsapp/webhook`
 
+Rotas públicas para Kommo AI Agent/Salesbot exigem o header `x-api-key` com o valor de `PUBLIC_API_KEY`:
+
+- `GET /api/public/groups/available`
+- `GET /api/public/groups/:id/quotas/available`
+- `GET /api/public/clients/by-phone/:phone/status`
+- `POST /api/public/clients/from-kommo`
+- `POST /api/public/quotas/reserve`
+- `POST /api/public/payments/create-link`
+- `POST /api/public/kommo/action`
+
+## Como conectar com Kommo AI Agent / Salesbot
+
+A Kommo deve usar as rotas `/api/public` para consultar grupos/cotas e executar ações no sistema. Configure o Salesbot/AI Agent para enviar sempre:
+
+```http
+x-api-key: change_me_public_api_key
+Content-Type: application/json
+```
+
+Exemplo para criar ou atualizar cliente:
+
+```json
+{
+  "name": "Carlos",
+  "phone": "27999999999",
+  "email": "carlos@email.com",
+  "cpf": "00000000000",
+  "origin": "KOMMO",
+  "kommoContactId": "123",
+  "kommoLeadId": "456"
+}
+```
+
+Envie para `POST /api/public/clients/from-kommo`.
+
+Exemplo para listar cotas disponíveis:
+
+```http
+GET /api/public/groups/GROUP_ID/quotas/available
+```
+
+Exemplo para reservar cota:
+
+```json
+{
+  "phone": "27999999999",
+  "groupId": "GROUP_ID",
+  "quotaNumber": 34,
+  "kommoLeadId": "456",
+  "kommoContactId": "123"
+}
+```
+
+Envie para `POST /api/public/quotas/reserve`. A resposta inclui `payment.paymentLink` mock para o agente continuar a conversa.
+
+Exemplo de action genérica para Salesbot:
+
+```json
+{
+  "action": "RESERVE_QUOTA",
+  "phone": "27999999999",
+  "payload": {
+    "groupId": "GROUP_ID",
+    "quotaNumber": 34
+  },
+  "kommo": {
+    "leadId": "456",
+    "contactId": "123"
+  }
+}
+```
+
+Envie para `POST /api/public/kommo/action`. Actions suportadas: `CHECK_CLIENT`, `LIST_GROUPS`, `LIST_AVAILABLE_QUOTAS`, `CREATE_OR_UPDATE_CLIENT`, `RESERVE_QUOTA`, `CREATE_PAYMENT_LINK`, `CHECK_PAYMENT_STATUS` e `REQUEST_HUMAN`.
+
 ## Fluxo de teste manual
 
 1. Suba API e Web.
@@ -133,4 +208,3 @@ Todas as rotas administrativas exigem `Authorization: Bearer <token>`. Webhooks 
 - WhatsApp real: conectar provider oficial ou BSP, validar assinatura do webhook e normalizar telefones.
 - Pagamento real: integrar gateway, trocar link mock por checkout real e confirmar pagamento por webhook assinado.
 - Operação: adicionar permissões finas por role, auditoria exportável e jobs de cobrança/overdue.
-Inicialmente
