@@ -15,6 +15,7 @@ import quotaRoutes from "./modules/quotas/quota.routes";
 import reportRoutes from "./modules/reports/report.routes";
 import userRoutes from "./modules/users/user.routes";
 import whatsappRoutes from "./modules/whatsapp/whatsapp.routes";
+import kommoSalesbotRoutes from "./modules/kommoSalesbot/kommoSalesbot.routes";
 
 export const app = express();
 
@@ -37,5 +38,6 @@ app.use("/api/draws", authMiddleware, drawRoutes);
 app.use("/api/reports", authMiddleware, reportRoutes);
 app.use("/api/automation", authMiddleware, automationRoutes);
 app.use("/api/audit", authMiddleware, auditRoutes);
+app.use("/api/kommo", kommoSalesbotRoutes);
 
 app.use(errorMiddleware);
